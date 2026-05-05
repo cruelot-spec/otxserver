@@ -1,36 +1,34 @@
-name: Compile OTX2 for Windows
+name: Compile OTX2 Windows
 
 on:
-  push:
-    branches: [ otxserv2 ]
   workflow_dispatch:
 
 jobs:
-  build-windows:
+  build:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout code + Submodules
         uses: actions/checkout@v4
         with:
           ref: otxserv2
           submodules: recursive
+          fetch-depth: 0
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Install Dependencies (Chocolatey)
-        run: |
-          choco install cmake ninja -y
+      - name: Install Build Tools
+        run: choco install cmake ninja -y
 
-      - name: Compile OTX2
+      - name: Configure & Build
         run: |
           mkdir build
           cd build
           cmake .. -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
-          cmake --build . --config Release --parallel
+          cmake --build . --config Release --parallel 2
 
-      - name: Upload Compiled EXE
+      - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: OTX2-Windows-Compiled
